@@ -311,7 +311,8 @@ public class CSWXWikiCachingRightService implements XWikiRightService {
 				.putAction("deleteversions", Right.ADMIN)
 				.putAction("deletespace", Right.ADMIN)
 				.putAction("temp", Right.VIEW)
-				.putAction("cswlinks", Right.VIEW);
+				.putAction("cswlinks", Right.VIEW)
+				.putAction("ontologyExAutocomplete", Right.VIEW);
 	}
 
 	private static class ActionMap extends HashMap<String, Right> {
