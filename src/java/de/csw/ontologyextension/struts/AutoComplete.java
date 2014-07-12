@@ -1,6 +1,10 @@
 package de.csw.ontologyextension.struts;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Iterator;
+
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -10,6 +14,7 @@ import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.web.XWikiAction;
 import com.xpn.xwiki.web.XWikiRequest;
+
 
 /**
  * @author hanna
@@ -24,16 +29,19 @@ public class AutoComplete extends XWikiAction {
 		if (query == null) {
 			return false;
 		}
+		OWLOntology ontology = null;
 		try {
-			getOntology();
+			ontology = getOntology();
 		} catch (OWLOntologyCreationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+		System.out.print("Loaded ontology: " + ontology);
 		return true;
 	}
 	
-	public void getOntology() throws OWLOntologyCreationException {
+	public OWLOntology getOntology() throws OWLOntologyCreationException {
 		// Get hold of an ontology manager
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		File file = new File("/home/hanna/Git/XWikiLinkRecommenderNew/resources/ontology/gewuerz.owl");
@@ -41,6 +49,7 @@ public class AutoComplete extends XWikiAction {
 	    OWLOntology ontology = manager.loadOntologyFromOntologyDocument(file);
 	    System.out.print("Loaded ontology: " + ontology);	
 		//return true;
+		return ontology;
 	}
 
 }
