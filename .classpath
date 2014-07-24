@@ -480,5 +480,7 @@
 	<classpathentry kind="var" path="XWIKI5_HOME/webapps/xwiki/WEB-INF/lib/zookeeper-3.3.6.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="con" path="org.testng.TESTNG_CONTAINER"/>
+	<classpathentry kind="lib" path="/home/hanna/Git/XWikiLinkRecommenderNew/lib/owlapi-distribution-3.5.0.jar"/>
+	<classpathentry kind="lib" path="/home/hanna/Git/XWikiLinkRecommenderNew/lib/struts2-json-plugin-2.3.8-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

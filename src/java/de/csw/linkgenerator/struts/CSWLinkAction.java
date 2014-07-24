@@ -44,7 +44,7 @@ public class CSWLinkAction extends XWikiAction {
 		SearchResults searchResults = lucene.getSearchResults(query, "de, en");
 		
 		Iterator<SearchResult> results = searchResults.getResults(1, 10).iterator();
-		
+
 		// optimized (only one hasNext() check per iteration)
 		if (results.hasNext()) {
 			for (;;) {
