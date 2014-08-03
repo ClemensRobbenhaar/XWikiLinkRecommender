@@ -315,7 +315,8 @@ public class CSWXWikiCachingRightService implements XWikiRightService {
 				.putAction("ontologyexautocomplete", Right.VIEW)
 		        .putAction("ontologyexaddclass", Right.VIEW)
 		        .putAction("ontologyexdeleteclass", Right.VIEW)
-		        .putAction("ontologyexeditclass", Right.VIEW);
+		        .putAction("ontologyexeditclass", Right.VIEW)
+				.putAction("ontologyexgetrel", Right.VIEW);
 	}
 
 	private static class ActionMap extends HashMap<String, Right> {

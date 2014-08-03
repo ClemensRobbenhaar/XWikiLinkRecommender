@@ -10,9 +10,12 @@ import java.util.List;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnnotation;
+import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
+import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -44,8 +47,8 @@ public class AddClass extends XWikiAction {
 		}
 		String sArray[] = new String[]{};
 		List<String> classes =  Arrays.asList(sArray);
-
-		classes = AddAxiom(query);
+		String currentlang = context.getLocale().getLanguage();
+		classes = AddAxiom(query, currentlang);
 		
 		Iterator<String> iterator = classes.iterator();
 		while(iterator.hasNext()) {
@@ -55,7 +58,7 @@ public class AddClass extends XWikiAction {
 		}
 
 	
-		public List<String> AddAxiom(String query) {
+		public List<String> AddAxiom(String query, String currentlang) {
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			OWLDataFactory factory = manager.getOWLDataFactory();
 			OWLOntology ontology = null;
@@ -70,21 +73,43 @@ public class AddClass extends XWikiAction {
 			IRI newClassIRI = IRI
 	                .create(ontology.getOntologyID().getOntologyIRI() + "#" + query);
 			OWLClass newClass = factory.getOWLClass(newClassIRI);
+			List<String> list = new ArrayList<String>();
+
+			for(OWLClass s : ontology.getClassesInSignature()) {
+				for(OWLAnnotation annotation : s.getAnnotations(ontology, factory.getRDFSLabel())) {
+		    		if (annotation.getValue() instanceof OWLLiteral) {
+	                    OWLLiteral val = (OWLLiteral) annotation.getValue();
+	                        if(val.getLiteral().equals(query.toString())) {
+	                        	return list;
+	                        }
+		    		}
+		    	}
+		    }
+			
 			OWLDeclarationAxiom declarationAxiom = factory.getOWLDeclarationAxiom(newClass);
 			manager.addAxiom(ontology, declarationAxiom);
 			
-			OWLOntology newOntology = null;
-			try {
-				newOntology = CreateOntology();
-			} catch (OWLOntologyCreationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			List<String> list = new ArrayList<String>();
+			// add new language tag
+			OWLAnnotation langTag = factory.getOWLAnnotation(factory.getRDFSLabel(),
+					factory.getOWLLiteral(query, currentlang));
+			OWLAxiom ax = factory.getOWLAnnotationAssertionAxiom(newClass.getIRI(),
+					langTag);
+	        manager.addAxiom(ontology, ax);
+			System.out.println("Axiom" + ax);
+			System.out.println("LangTag" + langTag);
+			
+			 for(OWLClass cls : ontology.getClassesInSignature()) {
+				    	for(OWLAnnotation annotation : cls.getAnnotations(ontology, factory.getRDFSLabel())) {
+				    		System.out.println(cls + ":" + annotation);
+				    		
+				    	}
+				    }
+			 
 		    for(OWLClass s : ontology.getClassesInSignature()) {
+		    	if(s.toString().contains(query)) {
 			    	list.add(s.toString());
 			    	list.add("\n");
-			    
+		    	}
 		    }
 		    return list;
 		}
