@@ -1,50 +1,43 @@
 package de.csw.ontologyextension.struts;
 
-import groovy.json.JsonOutput;
-
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
-import java.lang.reflect.Array;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
-import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.ResultSet;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.web.XWikiAction;
 import com.xpn.xwiki.web.XWikiRequest;
-
-import de.csw.linkgenerator.plugin.lucene.LucenePluginApi;
-import de.csw.linkgenerator.plugin.lucene.SearchResult;
-import de.csw.linkgenerator.plugin.lucene.SearchResults;
-import de.csw.util.URLEncoder;
-import de.csw.dbpedia.DBpediaLookupClient;
 
 
 /**
@@ -52,7 +45,7 @@ import de.csw.dbpedia.DBpediaLookupClient;
  *
  */
 
-public class AutoComplete extends XWikiAction {
+public class AutoComplete extends XWikiAction implements Synonyms {
 	
     @Override
 	public boolean action(XWikiContext context) throws XWikiException {
@@ -71,7 +64,6 @@ public class AutoComplete extends XWikiAction {
 		String query = request.get("text");
 
 		
-		String sArray[] = new String[]{};
 		JSONObject classes =  null;
 
 		if(query.isEmpty())
@@ -82,16 +74,6 @@ public class AutoComplete extends XWikiAction {
 		{
 			classes = CompareToOntology(query, currentLang);
 		}
-		//classes.add(0, "[results : [");
-		//classes.add("]]");
-		/*Iterator<String> iterator = classes.iterator();
-		
-		while(iterator.hasNext()) {
-				out.write(iterator.next());
-		}*/
-		
-		
-		System.out.println("Classes" + classes);
 		out.print(classes);
 		return true;
 		
@@ -99,10 +81,14 @@ public class AutoComplete extends XWikiAction {
 		
 	}
     
-    public List<String> getSynonyms(String query) {
-    	HTTPXMLTest synonymsMethod = new HTTPXMLTest();
-    	List<String> synonyms = synonymsMethod.main(query);
-    	System.out.println("Synonyms:" + synonyms);
+    public List<String> getSynonyms(String query, String currentLang) {
+    	List<String> synonyms = null;
+		try {
+			synonyms = start(query, currentLang);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     	return synonyms;
     	
     	
@@ -119,11 +105,9 @@ public class AutoComplete extends XWikiAction {
 			e.printStackTrace();
 		}
 	    
-	    //Check if Characters (also one) is contained by class of ontology and return class if true
-	    String toBeCheckedClass= "#"+ query;
 	    List<String> synonymList = new ArrayList<String>();
 	    List<String> ontologyList = new ArrayList<String>();
-	    synonymList = getSynonyms(query);
+	    synonymList = getSynonyms(query, currentLang);
 	    
         JSONObject inner = null;
         JSONArray outer = new JSONArray();
@@ -132,7 +116,6 @@ public class AutoComplete extends XWikiAction {
     		for(OWLAnnotation annotation : s.getAnnotations(ontology, factory.getRDFSLabel())) {
 	    		if (annotation.getValue() instanceof OWLLiteral) {
                     OWLLiteral val = (OWLLiteral) annotation.getValue();
-                        System.out.println(s + " -> " + val.getLiteral());
                         ontologyList.add(val.getLiteral());
                         if(val.getLiteral().toLowerCase().indexOf(query.toLowerCase()) > -1) {
                         	if (val.hasLang(currentLang)) {        
@@ -164,9 +147,9 @@ public class AutoComplete extends XWikiAction {
                         }
                 }
     		}
-    		System.out.println("ontologylist:" + ontologyList);
+    		//System.out.println("ontologylist:" + ontologyList);
 		}
-    	Set set = new HashSet(synonymList);
+    	Set<String> set = new HashSet<String>(synonymList);
 		ontologyList.retainAll(set);
     		for(int j=0; j<ontologyList.size(); j++)
     		{
@@ -194,7 +177,6 @@ public class AutoComplete extends XWikiAction {
 			e.printStackTrace();
 		}
    //list.add(list2.toString());
-	    System.out.println(mainObj);
 	    return mainObj;
 	    
 	}
@@ -232,6 +214,70 @@ public class AutoComplete extends XWikiAction {
 	    // Now load the local copy
 	    OWLOntology ontology = manager.loadOntologyFromOntologyDocument(file);
 	    return ontology;
+	}
+
+	@Override
+	public List<String> start(String query, String currentLang) throws Exception 
+	{
+		List<String> list =  new ArrayList<String>();
+		
+        URL url = new URL("http://lookup.dbpedia.org/api/search.asmx/KeywordSearch?QueryString=" + query);
+        URLConnection connection = url.openConnection();
+
+        Document doc = parseXML(connection.getInputStream());
+        NodeList descNodes = doc.getElementsByTagName("Label");
+
+        for(int i=0; i<descNodes.getLength();i++)
+        {
+            list.add(descNodes.item(i).getTextContent());
+        }
+         
+        // get Translations:
+        String squery = "'" + query + "'";
+        String queryTranslations=
+	    		"SELECT ?b"+
+	    		" WHERE { " +
+	    		"?a <http://www.w3.org/2000/01/rdf-schema#label>" + squery + "@" + currentLang + "." +
+	    		" ?a <http://wiktionary.dbpedia.org/terms/hasTranslation> ?b . "  +
+	    		"}";
+        // now creating query object
+		Query queryRequest = QueryFactory.create(queryTranslations);
+		// initializing queryExecution factory with remote service.
+		QueryExecution qexec = QueryExecutionFactory.sparqlService("http://wiktionary.dbpedia.org/sparql", queryRequest);
+
+		//List<String> listSynonyms = new ArrayList<String>();
+		try {
+		    ResultSet results = qexec.execSelect();
+		    while (results.hasNext()) {
+				QuerySolution qs = results.next();
+				list.add(qs.toString().split("/")[4].split("-")[0]);
+			}
+		}
+		finally {
+ 		   qexec.close();
+ 		}
+			
+        return list;
+	}
+
+	@Override
+	public Document parseXML(InputStream stream) throws Exception{
+		DocumentBuilderFactory objDocumentBuilderFactory = null;
+        DocumentBuilder objDocumentBuilder = null;
+        Document doc = null;
+        try
+        {
+            objDocumentBuilderFactory = DocumentBuilderFactory.newInstance();
+            objDocumentBuilder = objDocumentBuilderFactory.newDocumentBuilder();
+
+            doc = objDocumentBuilder.parse(stream);
+        }
+        catch(Exception ex)
+        {
+            throw ex;
+        }       
+
+        return doc;
 	}
 
 }

@@ -42,7 +42,6 @@ public class AddClass extends XWikiAction {
 		XWikiRequest request = context.getRequest();
 		String query = request.get("text");
 		if (query == null) {
-			out.write("FAIL");
 			return false;
 		}
 		String sArray[] = new String[]{};
@@ -69,7 +68,6 @@ public class AddClass extends XWikiAction {
 				e.printStackTrace();
 			}
 			
-			IRI ontologyIRI = IRI.create("/home/hanna/Git/XWikiLinkRecommenderNew/resources/ontology/gewuerz.owl");
 			IRI newClassIRI = IRI
 	                .create(ontology.getOntologyID().getOntologyIRI() + "#" + query);
 			OWLClass newClass = factory.getOWLClass(newClassIRI);
@@ -95,8 +93,6 @@ public class AddClass extends XWikiAction {
 			OWLAxiom ax = factory.getOWLAnnotationAssertionAxiom(newClass.getIRI(),
 					langTag);
 	        manager.addAxiom(ontology, ax);
-			System.out.println("Axiom" + ax);
-			System.out.println("LangTag" + langTag);
 			
 			 for(OWLClass cls : ontology.getClassesInSignature()) {
 				    	for(OWLAnnotation annotation : cls.getAnnotations(ontology, factory.getRDFSLabel())) {

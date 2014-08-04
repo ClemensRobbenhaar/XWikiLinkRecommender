@@ -16,8 +16,6 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
-import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -46,7 +44,6 @@ public class EditRelation extends XWikiAction {
 		String cls = request.get("cls");
 		String rel = request.get("rel");
 		if (query == null) {
-			out.write("FAIL");
 			return false;
 		}
 		String sArray[] = new String[]{};
@@ -72,7 +69,6 @@ public class EditRelation extends XWikiAction {
 				e.printStackTrace();
 			}
 			List<String> list = new ArrayList<String>();
-			System.out.println("Create Subclass:");
 		    OWLClass newCls = factory.getOWLClass(IRI.create(ontology.getOntologyID().getOntologyIRI() + "#" + query));
 	        OWLClass superCls = factory.getOWLClass(IRI.create(ontology.getOntologyID().getOntologyIRI() + "#" + cls));
 	        // Now create the axiom - Class A is Subclass of Class B
@@ -80,19 +76,13 @@ public class EditRelation extends XWikiAction {
 	        	OWLAxiom subAxiom = factory.getOWLSubClassOfAxiom(newCls, superCls);
 	        	AddAxiom addSubAxiom = new AddAxiom(ontology, subAxiom);
 	        	manager.applyChange(addSubAxiom);
-	        //}
-	        for (OWLClass cl : ontology.getClassesInSignature()) {
-	            System.out.println("Referenced class: " + cl);
-	        }
+	        
 	        Set<OWLClassExpression> superClasses = newCls.getSuperClasses(ontology);
-	        System.out.println("Asserted superclasses of " + newCls + ":");
 	        for (OWLClassExpression desc : superClasses) {
-	            System.out.println(desc);
 	            list.add("#S#,"  + desc.toString().split("#")[1].split(">")[0] + "," + desc.toString().replaceAll("[<>]", ""));
 	            list.add("\n");
 	        }
 	        Set<OWLClassExpression> subClasses = newCls.getSubClasses(ontology);
-	        System.out.println("Asserted superclasses of " + newCls + ":");
 	        for (OWLClassExpression desc : subClasses) {
 	            System.out.println(desc);
 	            list.add("#Sub#," + desc.toString().split("#")[1].split(">")[0] + "," + desc.toString().replaceAll("[<>]", ""));
@@ -108,51 +98,36 @@ public class EditRelation extends XWikiAction {
 
         	//if equivalent class has superclass, edit superclass of new class
         	Set<OWLClassExpression> superOfEqui = superCls.getSuperClasses(ontology);
-	        System.out.println("Asserted superclasses of " + newCls + ":");
 	        for (OWLClassExpression desc : superOfEqui) {
 	        	OWLAxiom sub = factory.getOWLSubClassOfAxiom(newCls, desc);
 	        	AddAxiom addSub = new AddAxiom(ontology, sub);
 	        	manager.applyChange(addSub);
-	            System.out.println(desc);
-	            //list.add("Superclass of " + superCls + desc.toString());
-	            //list.add("\n");
 	        }
 	        for (OWLClassExpression desc : superCls.getEquivalentClasses(ontology)) {
-	            System.out.println(desc);
 	            OWLAxiom equi = factory.getOWLEquivalentClassesAxiom(newCls, desc);
 	        	AddAxiom addEqui = new AddAxiom(ontology, equi);
 	        	manager.applyChange(addEqui);
 	        }
 	        
 	        Set<OWLClassExpression> equiClasses = newCls.getEquivalentClasses(ontology);
-	        System.out.println("Asserted superclasses of " + newCls + ":");
 	        for (OWLClassExpression desc : equiClasses) {
 	        	
 	        	for(OWLClassExpression expr : desc.getClassesInSignature())
-	        	{
-	        		System.out.println(expr);
-	        		
+	        	{	        		
 	        		list.add("#E#," + expr.toString().split("#")[1].split(">")[0] + "," + expr.toString().replaceAll("[<>]", ""));
-	        		list.add("\n");
-	        		
-	        		
+	        		list.add("\n");	        			        	
 	        	}
-	            System.out.println(desc);
 	        }
 	        
 	        
 	        Set<OWLClassExpression> superOfNew = newCls.getSuperClasses(ontology);
-	        System.out.println("Asserted superclasses of " + newCls + ":");
 	        for (OWLClassExpression desc : superOfNew) {
-	            System.out.println(desc);
 	            list.add("#S#," + desc.toString().split("#")[1].split(">")[0] + "," + desc.toString().replaceAll("[<>]", ""));
 	            list.add("\n");
 	        }
 	        
 	        Set<OWLClassExpression> subClasses = newCls.getSubClasses(ontology);
-	        System.out.println("Asserted superclasses of " + newCls + ":");
 	        for (OWLClassExpression desc : subClasses) {
-	            System.out.println(desc);
 	            list.add("#Sub#," + desc.toString().split("#")[1].split(">")[0] + "," + desc.toString().replaceAll("[<>]", ""));
 	            list.add("\n");
 	        }
@@ -166,9 +141,7 @@ public class EditRelation extends XWikiAction {
 	        	manager.applyChange(addSubAxiom);
 	        	
 	        	Set<OWLClassExpression> subClasses = newCls.getSubClasses(ontology);
-		        System.out.println("Asserted subclasses of " + newCls + ":");
 		        for (OWLClassExpression desc : subClasses) {
-		            System.out.println(desc);
 		            list.add("#Sub#," + desc.toString().split("#")[1].split(">")[0] + "," + desc.toString().replaceAll("[<>]", ""));
 		            list.add("\n");
 		        }

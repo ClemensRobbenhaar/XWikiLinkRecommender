@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -47,7 +45,6 @@ public class EditClass extends XWikiAction {
 		XWikiRequest request = context.getRequest();
 		String query = request.get("text");
 		if (query == null) {
-			out.write("FAIL");
 			return false;
 		}
 
@@ -59,21 +56,15 @@ public class EditClass extends XWikiAction {
 
 		if(existing != null)
 		{
-			System.out.println("TRUE");
 			JSONArray existingElements = getRelations(existing, query);
-			System.out.println("ExistingElement" + existingElements);
 			out.print(existingElements);
 		}
 		else
 		{
-			System.out.println("FALSE");
 			JSONArray relations = GetAxiom(query);
-			System.out.println("Not existing: " + relations);
 			out.print(relations);
 		}
-		
-		//out.print(axioms);
-		//out.print(axiomTypes);
+
 		return true;
 		}
 
@@ -91,11 +82,8 @@ public class EditClass extends XWikiAction {
 			JSONObject inner = null;
             JSONArray outer = new JSONArray();
 	        Set<OWLClassExpression> superClasses = existing.getSuperClasses(ontology);
-            System.out.println("SUperClasses: " + superClasses);
 
-	        System.out.println("Asserted superclasses of " + existing + ":");
 	        for (OWLClassExpression desc : superClasses) {
-	            System.out.println(desc);
 	            try {
     				inner = new JSONObject();
     				inner.put("SelectedRelation", "SuperClass");
@@ -107,9 +95,7 @@ public class EditClass extends XWikiAction {
 	            outer.put(inner);
 	        }
 	        Set<OWLClassExpression> subClasses = existing.getSubClasses(ontology);
-	        System.out.println("Asserted subClasses of " + existing + ":");
 	        for (OWLClassExpression desc : subClasses) {
-	            System.out.println(desc);
 	            try {
     				inner = new JSONObject();
     				inner.put("SelectedRelation", "SubClassOf");
@@ -176,10 +162,7 @@ public class EditClass extends XWikiAction {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			/*IRI ontologyIRI = IRI.create("/home/hanna/Git/XWikiLinkRecommenderNew/resources/ontology/gewuerz.owl");
-			IRI newClassIRI = IRI
-	                .create(ontology.getOntologyID().getOntologyIRI() + "#" + query);
-			OWLClass newClass = factory.getOWLClass(newClassIRI);*/
+
 			for(OWLClass s : ontology.getClassesInSignature()) {
 				for(OWLAnnotation annotation : s.getAnnotations(ontology, factory.getRDFSLabel())) {
 		    		if (annotation.getValue() instanceof OWLLiteral) {
@@ -235,17 +218,8 @@ public class EditClass extends XWikiAction {
 			OWLClass newClass = factory.getOWLClass(newClassIRI);
 			OWLDeclarationAxiom declarationAxiom = factory.getOWLDeclarationAxiom(newClass);
 			manager.addAxiom(ontology, declarationAxiom);
-			
-			OWLOntology newOntology = null;
-			try {
-				newOntology = CreateOntology();
-			} catch (OWLOntologyCreationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 
 			for(OWLAxiom bx : ontology.getLogicalAxioms()) {
-				System.out.println("TypeList:" + typeList);
 				if(typeList.contains(bx.getAxiomType().toString()) == false) {
 					inner = new JSONObject();
     				try {
@@ -258,7 +232,6 @@ public class EditClass extends XWikiAction {
 				}
 				typeList.add(bx.getAxiomType().toString());
 			}
-			System.out.println("out1:" + outer);
 			if(typeList.contains("SuperClass") == false)
 			{
 				inner = new JSONObject();
@@ -270,8 +243,6 @@ public class EditClass extends XWikiAction {
 				}
 			}
 			outer.put(inner);
-			System.out.println("inner" + inner.has("Type"));
-			System.out.println("out2:" + outer);
 		   
 		    for(OWLClass s : ontology.getClassesInSignature()) {
 		    	inner = new JSONObject();
@@ -284,7 +255,6 @@ public class EditClass extends XWikiAction {
 			    	
 				outer.put(inner); 
 		    }
-		    System.out.println("out3:" + outer);
 		    return outer;
 		}
 		

@@ -14,8 +14,6 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -42,7 +40,6 @@ public class DeleteClass extends XWikiAction {
 		XWikiRequest request = context.getRequest();
 		String query = request.get("text");
 		if (query == null) {
-			out.write("FAIL");
 			return false;
 		}
 		String sArray[] = new String[]{};
@@ -61,7 +58,6 @@ public class DeleteClass extends XWikiAction {
 	
 		public List<String> DeleteAxiom(String query) {
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			OWLDataFactory factory = manager.getOWLDataFactory();
 			OWLOntology ontology = null;
 			try {
 				ontology = CreateOntology();
@@ -74,12 +70,9 @@ public class DeleteClass extends XWikiAction {
 	        for (OWLAxiom ax : ontology.getAxioms()) {
 	            if (ax.getSignature().contains(toDelete)) {
 	                axiomsToRemove.add(ax);
-	                System.out.println("to remove from " + ontology.getOntologyID().getOntologyIRI() + ": " + ax);
 	            }
 	        }
-	        System.out.println("Before: " + ontology.getAxiomCount());
 	        manager.removeAxioms(ontology, axiomsToRemove);
-	        System.out.println("After: " + ontology.getAxiomCount());
 	        List<String> list = new ArrayList<String>();
 		    for(OWLClass s : ontology.getClassesInSignature()) {
 			    	list.add(s.toString());
