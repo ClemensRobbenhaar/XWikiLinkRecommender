@@ -14,6 +14,7 @@ import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.lang3.text.WordUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,10 +35,14 @@ import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.sparql.sse.builders.BuilderExpr.Build;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.web.XWikiAction;
 import com.xpn.xwiki.web.XWikiRequest;
+
+import de.csw.ontology.OntologyIndex;
+import de.csw.util.Config;
 
 
 /**
@@ -46,7 +51,7 @@ import com.xpn.xwiki.web.XWikiRequest;
  */
 
 public class AutoComplete extends XWikiAction implements Synonyms {
-	
+	final static String APP_PROP_FILE = "build.properties";
     @Override
 	public boolean action(XWikiContext context) throws XWikiException {
 		
@@ -116,7 +121,7 @@ public class AutoComplete extends XWikiAction implements Synonyms {
     		for(OWLAnnotation annotation : s.getAnnotations(ontology, factory.getRDFSLabel())) {
 	    		if (annotation.getValue() instanceof OWLLiteral) {
                     OWLLiteral val = (OWLLiteral) annotation.getValue();
-                        ontologyList.add(val.getLiteral());
+                        ontologyList.add(val.getLiteral().toLowerCase());
                         if(val.getLiteral().toLowerCase().indexOf(query.toLowerCase()) > -1) {
                         	if (val.hasLang(currentLang)) {        
                 				try {
@@ -149,6 +154,8 @@ public class AutoComplete extends XWikiAction implements Synonyms {
     		}
     		//System.out.println("ontologylist:" + ontologyList);
 		}
+		System.out.println("Synonymes:" + synonymList);
+		System.out.println("OntologieElements:" + ontologyList);
     	Set<String> set = new HashSet<String>(synonymList);
 		ontologyList.retainAll(set);
     		for(int j=0; j<ontologyList.size(); j++)
@@ -157,7 +164,7 @@ public class AutoComplete extends XWikiAction implements Synonyms {
     				try {
         				inner = new JSONObject();
         				inner.put("id", j);
-        				inner.put("value", value);
+        				inner.put("value", WordUtils.capitalize(value) + " (Synonym of " + query + ")");
         				inner.put("info", value);
         			} catch (JSONException e) {
         				// TODO Auto-generated catch block
@@ -167,6 +174,8 @@ public class AutoComplete extends XWikiAction implements Synonyms {
     			outer.put(inner);
     		}
     		
+    	
+    	System.out.println("FinalList:" + outer);
     	
     	
     	JSONObject mainObj = new JSONObject();
@@ -210,7 +219,13 @@ public class AutoComplete extends XWikiAction implements Synonyms {
 	
 	public OWLOntology CreateOntology() throws OWLOntologyCreationException {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		ClassLoader cl = this.getClass().getClassLoader();
+		Config.loadConfigFile(cl.getResourceAsStream(APP_PROP_FILE), false);
+		Config.loadConfigFile(cl.getResourceAsStream(APP_PROP_FILE + ".user"), true);
+		String resource = Config.getAppProperty(Config.DIR_RESOURCES);
+		System.out.println("RESULT:" + resource);
 		File file = new File("/home/hanna/Git/XWikiLinkRecommenderNew/resources/ontology/gewuerz.owl");
+		System.out.println(file);
 	    // Now load the local copy
 	    OWLOntology ontology = manager.loadOntologyFromOntologyDocument(file);
 	    return ontology;
@@ -229,7 +244,11 @@ public class AutoComplete extends XWikiAction implements Synonyms {
 
         for(int i=0; i<descNodes.getLength();i++)
         {
-            list.add(descNodes.item(i).getTextContent());
+        	if(descNodes.item(i).getParentNode().toString().contains("Result"))
+        	{
+        		list.add(descNodes.item(i).getTextContent().toLowerCase());
+        	}
+        	
         }
          
         // get Translations:
@@ -250,7 +269,7 @@ public class AutoComplete extends XWikiAction implements Synonyms {
 		    ResultSet results = qexec.execSelect();
 		    while (results.hasNext()) {
 				QuerySolution qs = results.next();
-				list.add(qs.toString().split("/")[4].split("-")[0]);
+				list.add(qs.toString().split("/")[4].split("-")[0].toLowerCase());
 			}
 		}
 		finally {

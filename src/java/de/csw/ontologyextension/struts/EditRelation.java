@@ -19,6 +19,7 @@ import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -61,9 +62,10 @@ public class EditRelation extends XWikiAction {
 		public List<String> SaveRelation(String query, String cls, String rel) {
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 	        OWLDataFactory factory = manager.getOWLDataFactory();
+	        File file = new File("/home/hanna/Git/XWikiLinkRecommenderNew/resources/ontology/gewuerz.owl");
 			OWLOntology ontology = null;
 			try {
-				ontology = CreateOntology();
+				ontology = manager.loadOntologyFromOntologyDocument(file);
 			} catch (OWLOntologyCreationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -147,6 +149,14 @@ public class EditRelation extends XWikiAction {
 		        }
 	        	
 	        }
+	        
+	        try {
+				manager.saveOntology(ontology);
+			} catch (OWLOntologyStorageException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	    
+	        
 	        return list;
 			
 		}

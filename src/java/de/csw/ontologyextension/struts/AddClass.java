@@ -1,5 +1,6 @@
 package de.csw.ontologyextension.struts;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -9,6 +10,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.StreamDocumentTarget;
+import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -19,6 +22,7 @@ import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -60,9 +64,10 @@ public class AddClass extends XWikiAction {
 		public List<String> AddAxiom(String query, String currentlang) {
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			OWLDataFactory factory = manager.getOWLDataFactory();
+			File file = new File("/home/hanna/Git/XWikiLinkRecommenderNew/resources/ontology/gewuerz.owl");
 			OWLOntology ontology = null;
 			try {
-				ontology = CreateOntology();
+				ontology = manager.loadOntologyFromOntologyDocument(file);
 			} catch (OWLOntologyCreationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -85,15 +90,23 @@ public class AddClass extends XWikiAction {
 		    }
 			
 			OWLDeclarationAxiom declarationAxiom = factory.getOWLDeclarationAxiom(newClass);
-			manager.addAxiom(ontology, declarationAxiom);
-			
+			AddAxiom addAxiomDecl = new AddAxiom(ontology, declarationAxiom);
+	        manager.applyChange(addAxiomDecl);
+	        
 			// add new language tag
 			OWLAnnotation langTag = factory.getOWLAnnotation(factory.getRDFSLabel(),
 					factory.getOWLLiteral(query, currentlang));
 			OWLAxiom ax = factory.getOWLAnnotationAssertionAxiom(newClass.getIRI(),
 					langTag);
-	        manager.addAxiom(ontology, ax);
-			
+			AddAxiom addAxiomAnnot = new AddAxiom(ontology, ax);
+	        manager.applyChange(addAxiomAnnot);
+	        try {
+				manager.saveOntology(ontology);
+			} catch (OWLOntologyStorageException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	        
+
 			 for(OWLClass cls : ontology.getClassesInSignature()) {
 				    	for(OWLAnnotation annotation : cls.getAnnotations(ontology, factory.getRDFSLabel())) {
 				    		System.out.println(cls + ":" + annotation);
@@ -102,22 +115,15 @@ public class AddClass extends XWikiAction {
 				    }
 			 
 		    for(OWLClass s : ontology.getClassesInSignature()) {
-		    	if(s.toString().contains(query)) {
+		    	if(s.toString().indexOf(query) > -1) {
 			    	list.add(s.toString());
 			    	list.add("\n");
 		    	}
 		    }
+		    
 		    return list;
 		}
 		
-		
-		public OWLOntology CreateOntology() throws OWLOntologyCreationException {
-			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			File file = new File("/home/hanna/Git/XWikiLinkRecommenderNew/resources/ontology/gewuerz.owl");
-		    // Now load the local copy
-		    OWLOntology ontology = manager.loadOntologyFromOntologyDocument(file);
-		    return ontology;
-		}
 	}
 
 
