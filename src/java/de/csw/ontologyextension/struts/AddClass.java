@@ -82,7 +82,7 @@ public class AddClass extends XWikiAction {
 				for(OWLAnnotation annotation : s.getAnnotations(ontology, factory.getRDFSLabel())) {
 		    		if (annotation.getValue() instanceof OWLLiteral) {
 	                    OWLLiteral val = (OWLLiteral) annotation.getValue();
-	                        if(val.getLiteral().equals(query.toString())) {
+	                        if(val.getLiteral().toLowerCase().equals(query.toString().toLowerCase())) {
 	                        	return list;
 	                        }
 		    		}
