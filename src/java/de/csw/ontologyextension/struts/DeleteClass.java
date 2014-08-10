@@ -66,17 +66,17 @@ public class DeleteClass extends XWikiAction {
 		public List<String> DeleteAxiom(String query) {
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			OWLDataFactory factory = manager.getOWLDataFactory();
-			File file = new File("/home/hanna/Git/XWikiLinkRecommenderNew/resources/ontology/gewuerz.owl");
+			/*File file = new File("/home/hanna/Git/XWikiLinkRecommenderNew/resources/ontology/gewuerz.owl");
+
 			OWLOntology ontology = null;
 			try {
 				ontology = manager.loadOntologyFromOntologyDocument(file);
 			} catch (OWLOntologyCreationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
-			System.out.println("after ontology");
+			}*/
+			OWLOntology ontology = OntologyManager.getOntology();
 			OWLClass toDelete = manager.getOWLDataFactory().getOWLClass(IRI.create(ontology.getOntologyID().getOntologyIRI() + "#" + query));
-			System.out.println("to delete: " + toDelete);
 			Set<OWLAxiom> axiomsToRemove = new HashSet<OWLAxiom>();
 	        for (OWLAxiom ax : ontology.getAxioms()) {
 	            if (ax.getSignature().toString().indexOf(query.toString()) > -1) {
@@ -84,6 +84,7 @@ public class DeleteClass extends XWikiAction {
 	                axiomsToRemove.add(ax);
 	            }
 	        }
+	        
 	        for (OWLClass cls : ontology.getClassesInSignature()) {
 	        	if(cls.toString().indexOf(query) > -1) {
 	        	for(OWLAnnotation annotation : cls.getAnnotations(ontology, factory.getRDFSLabel())) {
@@ -91,25 +92,25 @@ public class DeleteClass extends XWikiAction {
 	                RemoveOntologyAnnotation remAnno = new RemoveOntologyAnnotation(ontology, annotation);
 	                System.out.println("RemAnno: " + remAnno);
 	                manager.applyChange(remAnno);  
-	                try {
+	                /*try {
 	        			manager.saveOntology(ontology);
 	        			System.out.println("Saved");
 	        		} catch (OWLOntologyStorageException e) {
 	        			// TODO Auto-generated catch block
 	        			e.printStackTrace();
-	        		}   
+	        		} */
 	        	}
 		    	}
 	        }
 
 	        manager.removeAxioms(ontology, axiomsToRemove);
-	        try {
+	       /* try {
 				manager.saveOntology(ontology);
 			} catch (OWLOntologyStorageException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}	    
-	        
+	        */
 	        List<String> list = new ArrayList<String>();
 	        
 		    for(OWLClass s : ontology.getClassesInSignature()) {
@@ -121,14 +122,6 @@ public class DeleteClass extends XWikiAction {
 		    return list;
 		}
 		
-		
-		public OWLOntology CreateOntology() throws OWLOntologyCreationException {
-			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			File file = new File("/home/hanna/Git/XWikiLinkRecommenderNew/resources/ontology/gewuerz.owl");
-		    // Now load the local copy
-		    OWLOntology ontology = manager.loadOntologyFromOntologyDocument(file);
-		    return ontology;
-		}
 	}
 
 

@@ -102,14 +102,14 @@ public class AutoComplete extends XWikiAction implements Synonyms {
 	public JSONObject CompareToOntology(String query, String currentLang) {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLDataFactory factory = manager.getOWLDataFactory();
-		OWLOntology ontology = null;
+		/*OWLOntology ontology = null;
 		try {
 			ontology = CreateOntology();
 		} catch (OWLOntologyCreationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-	    
+		}*/
+	    OWLOntology ontology = OntologyManager.getOntology();
 	    List<String> synonymList = new ArrayList<String>();
 	    List<String> ontologyList = new ArrayList<String>();
 	    synonymList = getSynonyms(query, currentLang);
@@ -189,7 +189,7 @@ public class AutoComplete extends XWikiAction implements Synonyms {
 	    return mainObj;
 	    
 	}
-	
+	/*
 	public List<String> GetOntology() {
 	    OWLOntology ontology = null;
 		try {
@@ -216,20 +216,7 @@ public class AutoComplete extends XWikiAction implements Synonyms {
 	    return list;
 	    
 	}
-	
-	public OWLOntology CreateOntology() throws OWLOntologyCreationException {
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ClassLoader cl = this.getClass().getClassLoader();
-		Config.loadConfigFile(cl.getResourceAsStream(APP_PROP_FILE), false);
-		Config.loadConfigFile(cl.getResourceAsStream(APP_PROP_FILE + ".user"), true);
-		String resource = Config.getAppProperty(Config.DIR_RESOURCES);
-		System.out.println("RESULT:" + resource);
-		File file = new File("/home/hanna/Git/XWikiLinkRecommenderNew/resources/ontology/gewuerz.owl");
-		System.out.println(file);
-	    // Now load the local copy
-	    OWLOntology ontology = manager.loadOntologyFromOntologyDocument(file);
-	    return ontology;
-	}
+	*/
 
 	@Override
 	public List<String> start(String query, String currentLang) throws Exception 

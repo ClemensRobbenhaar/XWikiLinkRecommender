@@ -62,22 +62,25 @@ public class EditRelation extends XWikiAction {
 		public List<String> SaveRelation(String query, String cls, String rel) {
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 	        OWLDataFactory factory = manager.getOWLDataFactory();
-	        File file = new File("/home/hanna/Git/XWikiLinkRecommenderNew/resources/ontology/gewuerz.owl");
+			/*File file = new File("/home/hanna/Git/XWikiLinkRecommenderNew/resources/ontology/gewuerz.owl");
+
 			OWLOntology ontology = null;
 			try {
 				ontology = manager.loadOntologyFromOntologyDocument(file);
 			} catch (OWLOntologyCreationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+			}*/
+			OWLOntology ontology = OntologyManager.getOntology();
 			List<String> list = new ArrayList<String>();
 		    OWLClass newCls = factory.getOWLClass(IRI.create(ontology.getOntologyID().getOntologyIRI() + "#" + query));
 	        OWLClass superCls = factory.getOWLClass(IRI.create(ontology.getOntologyID().getOntologyIRI() + "#" + cls));
 	        // Now create the axiom - Class A is Subclass of Class B
 	        if(rel.equalsIgnoreCase("SubClassOf")){
 	        	OWLAxiom subAxiom = factory.getOWLSubClassOfAxiom(newCls, superCls);
-	        	AddAxiom addSubAxiom = new AddAxiom(ontology, subAxiom);
-	        	manager.applyChange(addSubAxiom);
+	        	manager.addAxiom(ontology, subAxiom);
+	        	//AddAxiom addSubAxiom = new AddAxiom(ontology, subAxiom);
+	        	//manager.applyChange(addSubAxiom);
 	        
 	        Set<OWLClassExpression> superClasses = newCls.getSuperClasses(ontology);
 	        for (OWLClassExpression desc : superClasses) {
@@ -95,20 +98,23 @@ public class EditRelation extends XWikiAction {
 	        else if(rel.equalsIgnoreCase("EquivalentClasses")) {
 	        //Add Equivalent Class
 	        OWLAxiom equiAxiom = factory.getOWLEquivalentClassesAxiom(newCls, superCls);
-        	AddAxiom addEquiAxiom = new AddAxiom(ontology, equiAxiom);
-        	manager.applyChange(addEquiAxiom);
+	        manager.addAxiom(ontology, equiAxiom);
+        	//AddAxiom addEquiAxiom = new AddAxiom(ontology, equiAxiom);
+        	//manager.applyChange(addEquiAxiom);
 
         	//if equivalent class has superclass, edit superclass of new class
         	Set<OWLClassExpression> superOfEqui = superCls.getSuperClasses(ontology);
 	        for (OWLClassExpression desc : superOfEqui) {
 	        	OWLAxiom sub = factory.getOWLSubClassOfAxiom(newCls, desc);
-	        	AddAxiom addSub = new AddAxiom(ontology, sub);
-	        	manager.applyChange(addSub);
+	        	manager.addAxiom(ontology, sub);
+	        	//AddAxiom addSub = new AddAxiom(ontology, sub);
+	        	//manager.applyChange(addSub);
 	        }
 	        for (OWLClassExpression desc : superCls.getEquivalentClasses(ontology)) {
 	            OWLAxiom equi = factory.getOWLEquivalentClassesAxiom(newCls, desc);
-	        	AddAxiom addEqui = new AddAxiom(ontology, equi);
-	        	manager.applyChange(addEqui);
+	            manager.addAxiom(ontology, equi);
+	        	//AddAxiom addEqui = new AddAxiom(ontology, equi);
+	        	//manager.applyChange(addEqui);
 	        }
 	        
 	        Set<OWLClassExpression> equiClasses = newCls.getEquivalentClasses(ontology);
@@ -139,8 +145,9 @@ public class EditRelation extends XWikiAction {
 	        // SuperClass
 	        else if(rel.equalsIgnoreCase("SuperClass")) {
 	        	OWLAxiom superAxiom = factory.getOWLSubClassOfAxiom(superCls, newCls);
-	        	AddAxiom addSubAxiom = new AddAxiom(ontology, superAxiom);
-	        	manager.applyChange(addSubAxiom);
+	        	manager.addAxiom(ontology, superAxiom);
+	        	//AddAxiom addSubAxiom = new AddAxiom(ontology, superAxiom);
+	        	//manager.applyChange(addSubAxiom);
 	        	
 	        	Set<OWLClassExpression> subClasses = newCls.getSubClasses(ontology);
 		        for (OWLClassExpression desc : subClasses) {
@@ -149,27 +156,18 @@ public class EditRelation extends XWikiAction {
 		        }
 	        	
 	        }
-	        
+	        /*
 	        try {
 				manager.saveOntology(ontology);
 			} catch (OWLOntologyStorageException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}	    
-	        
+	        */
 	        return list;
 			
 		}
 	
-	
-		
-		public OWLOntology CreateOntology() throws OWLOntologyCreationException {
-			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			File file = new File("/home/hanna/Git/XWikiLinkRecommenderNew/resources/ontology/gewuerz.owl");
-		    // Now load the local copy
-		    OWLOntology ontology = manager.loadOntologyFromOntologyDocument(file);
-		    return ontology;
-		}
 	}
 
 

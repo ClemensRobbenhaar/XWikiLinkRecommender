@@ -77,14 +77,15 @@ public class EditClass extends XWikiAction {
 		public JSONArray getRelations(OWLClass existing, String query) {
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			OWLDataFactory factory = manager.getOWLDataFactory();
-			File file = new File("/home/hanna/Git/XWikiLinkRecommenderNew/resources/ontology/gewuerz.owl");
+			/*File file = new File("/home/hanna/Git/XWikiLinkRecommenderNew/resources/ontology/gewuerz.owl");
 			OWLOntology ontology = null;
 			try {
 				ontology = manager.loadOntologyFromOntologyDocument(file);
 			} catch (OWLOntologyCreationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+			}*/
+			OWLOntology ontology = OntologyManager.getOntology();
 			JSONObject inner = null;
             JSONArray outer = new JSONArray();
 			List<String> typeList = new ArrayList<String>();
@@ -177,14 +178,14 @@ public class EditClass extends XWikiAction {
 		{
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			OWLDataFactory factory = manager.getOWLDataFactory();
-			OWLOntology ontology = null;
+			/*OWLOntology ontology = null;
 			try {
 				ontology = CreateOntology();
 			} catch (OWLOntologyCreationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
-
+			}*/
+			OWLOntology ontology = OntologyManager.getOntology();
 			for(OWLClass s : ontology.getClassesInSignature()) {
 				for(OWLAnnotation annotation : s.getAnnotations(ontology, factory.getRDFSLabel())) {
 		    		if (annotation.getValue() instanceof OWLLiteral) {
@@ -226,15 +227,16 @@ public class EditClass extends XWikiAction {
 		
 		public JSONArray getAxiom(String query) {
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			File file = new File("/home/hanna/Git/XWikiLinkRecommenderNew/resources/ontology/gewuerz.owl");
 			OWLDataFactory factory = manager.getOWLDataFactory();
+			/*File file = new File("/home/hanna/Git/XWikiLinkRecommenderNew/resources/ontology/gewuerz.owl");
 			OWLOntology ontology = null;
 			try {
 				ontology = manager.loadOntologyFromOntologyDocument(file);
 			} catch (OWLOntologyCreationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+			}*/
+			OWLOntology ontology = OntologyManager.getOntology();
 			JSONObject inner = null;
 			JSONArray outer = new JSONArray();
 			List<String> typeList = new ArrayList<String>();
@@ -290,14 +292,6 @@ public class EditClass extends XWikiAction {
 		    return outer;
 		}
 		
-		
-		public OWLOntology CreateOntology() throws OWLOntologyCreationException {
-			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			File file = new File("/home/hanna/Git/XWikiLinkRecommenderNew/resources/ontology/gewuerz.owl");
-		    // Now load the local copy
-		    OWLOntology ontology = manager.loadOntologyFromOntologyDocument(file);
-		    return ontology;
-		}
 	}
 
 

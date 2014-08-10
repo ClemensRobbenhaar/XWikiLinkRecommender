@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -28,6 +30,9 @@ import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.web.XWikiAction;
 import com.xpn.xwiki.web.XWikiRequest;
+
+import de.csw.util.Config;
+import de.csw.xwiki.plugin.OntologyPlugin;
 
 public class AddClass extends XWikiAction {
 	
@@ -64,15 +69,31 @@ public class AddClass extends XWikiAction {
 		public List<String> AddAxiom(String query, String currentlang) {
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			OWLDataFactory factory = manager.getOWLDataFactory();
-			File file = new File("/home/hanna/Git/XWikiLinkRecommenderNew/resources/ontology/gewuerz.owl");
+			/*File file = new File("/home/hanna/Git/XWikiLinkRecommenderNew/resources/ontology/gewuerz.owl");
 			OWLOntology ontology = null;
 			try {
 				ontology = manager.loadOntologyFromOntologyDocument(file);
 			} catch (OWLOntologyCreationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			}*/
+			/*ClassLoader cl = OntologyPlugin.class.getClassLoader();
+			URL url = cl.getResource(Config.getAppProperty(Config.ONTOLOGY_FILE));
+			IRI ontologyIRI = null;
+			try {
+				ontologyIRI = IRI.create(url);
+			} catch (URISyntaxException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
-			
+			OWLOntology ontology = null;
+			try {
+				ontology = manager.loadOntologyFromOntologyDocument(ontologyIRI);
+			} catch (OWLOntologyCreationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}*/
+			OWLOntology ontology = OntologyManager.getOntology();
 			IRI newClassIRI = IRI
 	                .create(ontology.getOntologyID().getOntologyIRI() + "#" + query);
 			OWLClass newClass = factory.getOWLClass(newClassIRI);
@@ -90,22 +111,23 @@ public class AddClass extends XWikiAction {
 		    }
 			
 			OWLDeclarationAxiom declarationAxiom = factory.getOWLDeclarationAxiom(newClass);
-			AddAxiom addAxiomDecl = new AddAxiom(ontology, declarationAxiom);
-	        manager.applyChange(addAxiomDecl);
-	        
+			//AddAxiom addAxiomDecl = new AddAxiom(ontology, declarationAxiom);
+	        //manager.applyChange(addAxiomDecl);
+	        manager.addAxiom(ontology, declarationAxiom);
 			// add new language tag
 			OWLAnnotation langTag = factory.getOWLAnnotation(factory.getRDFSLabel(),
 					factory.getOWLLiteral(query, currentlang));
 			OWLAxiom ax = factory.getOWLAnnotationAssertionAxiom(newClass.getIRI(),
 					langTag);
 			AddAxiom addAxiomAnnot = new AddAxiom(ontology, ax);
-	        manager.applyChange(addAxiomAnnot);
-	        try {
+			manager.addAxiom(ontology, ax);
+	        //manager.applyChange(addAxiomAnnot);
+	        /*try {
 				manager.saveOntology(ontology);
 			} catch (OWLOntologyStorageException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}	        
+			}	*/        
 
 			 for(OWLClass cls : ontology.getClassesInSignature()) {
 				    	for(OWLAnnotation annotation : cls.getAnnotations(ontology, factory.getRDFSLabel())) {

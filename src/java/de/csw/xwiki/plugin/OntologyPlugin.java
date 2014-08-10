@@ -35,6 +35,7 @@ import com.xpn.xwiki.plugin.XWikiDefaultPlugin;
 import com.xpn.xwiki.plugin.XWikiPluginInterface;
 
 import de.csw.ontology.OntologyIndex;
+import de.csw.ontologyextension.struts.OntologyManager;
 import de.csw.util.Config;
 
 public class OntologyPlugin extends XWikiDefaultPlugin {
@@ -66,8 +67,10 @@ public class OntologyPlugin extends XWikiDefaultPlugin {
 		// load the ontology
 		log.debug("Loading ontology from file " + Config.getAppProperty(Config.ONTOLOGY_FILE));
 		OntologyIndex.get().load(cl.getResourceAsStream(Config.getAppProperty(Config.ONTOLOGY_FILE)));
+		System.out.println("Resource" + cl.getResource(Config.getAppProperty(Config.ONTOLOGY_FILE)));
+		OntologyManager.loadOntology(cl.getResource(Config.getAppProperty(Config.ONTOLOGY_FILE)));
+		//OntologyManager.saveOntology(cl.getResource(Config.getAppProperty(Config.ONTOLOGY_FILE)));
 		log.debug("** " + OntologyIndex.get().getModel().size() + " statements loaded.");
-		
 		XWikiNotificationManager notificationManager = context.getWiki().getNotificationManager();
 		
 		XWikiNotificationRule rule = new OntologyNotificationRule(this);
