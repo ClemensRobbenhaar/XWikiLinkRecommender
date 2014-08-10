@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
@@ -21,6 +22,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.semanticweb.owlapi.model.RemoveAxiom;
+import org.semanticweb.owlapi.model.RemoveOntologyAnnotation;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -75,18 +77,32 @@ public class DeleteClass extends XWikiAction {
 			System.out.println("after ontology");
 			OWLClass toDelete = manager.getOWLDataFactory().getOWLClass(IRI.create(ontology.getOntologyID().getOntologyIRI() + "#" + query));
 			System.out.println("to delete: " + toDelete);
-			/*Set<OWLAxiom> axiomsToRemove = new HashSet<OWLAxiom>();
+			Set<OWLAxiom> axiomsToRemove = new HashSet<OWLAxiom>();
 	        for (OWLAxiom ax : ontology.getAxioms()) {
 	            if (ax.getSignature().toString().indexOf(query.toString()) > -1) {
 	            	System.out.println("ax" + ax);
 	                axiomsToRemove.add(ax);
 	            }
-	        }*/
-	        
-	        OWLDeclarationAxiom declarationAxiom = factory.getOWLDeclarationAxiom(toDelete);
-	        RemoveAxiom axiom = new RemoveAxiom(ontology, declarationAxiom);
-	        manager.applyChange(axiom);
-	        //manager.removeAxioms(ontology, axiomsToRemove);
+	        }
+	        for (OWLClass cls : ontology.getClassesInSignature()) {
+	        	if(cls.toString().indexOf(query) > -1) {
+	        	for(OWLAnnotation annotation : cls.getAnnotations(ontology, factory.getRDFSLabel())) {
+	        		System.out.println("Annotation: " + annotation);
+	                RemoveOntologyAnnotation remAnno = new RemoveOntologyAnnotation(ontology, annotation);
+	                System.out.println("RemAnno: " + remAnno);
+	                manager.applyChange(remAnno);  
+	                try {
+	        			manager.saveOntology(ontology);
+	        			System.out.println("Saved");
+	        		} catch (OWLOntologyStorageException e) {
+	        			// TODO Auto-generated catch block
+	        			e.printStackTrace();
+	        		}   
+	        	}
+		    	}
+	        }
+
+	        manager.removeAxioms(ontology, axiomsToRemove);
 	        try {
 				manager.saveOntology(ontology);
 			} catch (OWLOntologyStorageException e) {
@@ -95,16 +111,14 @@ public class DeleteClass extends XWikiAction {
 			}	    
 	        
 	        List<String> list = new ArrayList<String>();
-	        /*
+	        
 		    for(OWLClass s : ontology.getClassesInSignature()) {
 			    	list.add(s.toString());
 			    	list.add("\n");
 			    
-		    }*/
-		    //System.out.println(axiomsToRemove.toString());
-		    //list.add(axiomsToRemove.toString());
+		    }
+
 		    return list;
-		    //return axiomsToRemove.toString();
 		}
 		
 		
