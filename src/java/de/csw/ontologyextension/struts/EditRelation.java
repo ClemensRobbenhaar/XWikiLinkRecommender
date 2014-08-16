@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -62,19 +63,11 @@ public class EditRelation extends XWikiAction {
 		public List<String> SaveRelation(String query, String cls, String rel) {
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 	        OWLDataFactory factory = manager.getOWLDataFactory();
-			/*File file = new File("/home/hanna/Git/XWikiLinkRecommenderNew/resources/ontology/gewuerz.owl");
-
-			OWLOntology ontology = null;
-			try {
-				ontology = manager.loadOntologyFromOntologyDocument(file);
-			} catch (OWLOntologyCreationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}*/
 			OWLOntology ontology = OntologyManager.getOntology();
 			List<String> list = new ArrayList<String>();
-		    OWLClass newCls = factory.getOWLClass(IRI.create(ontology.getOntologyID().getOntologyIRI() + "#" + query));
+			OWLClass newCls = factory.getOWLClass(IRI.create(ontology.getOntologyID().getOntologyIRI() + "#" + query));
 	        OWLClass superCls = factory.getOWLClass(IRI.create(ontology.getOntologyID().getOntologyIRI() + "#" + cls));
+	        
 	        // Now create the axiom - Class A is Subclass of Class B
 	        if(rel.equalsIgnoreCase("SubClassOf")){
 	        	OWLAxiom subAxiom = factory.getOWLSubClassOfAxiom(newCls, superCls);
@@ -156,14 +149,6 @@ public class EditRelation extends XWikiAction {
 		        }
 	        	
 	        }
-	        /*
-	        try {
-				manager.saveOntology(ontology);
-			} catch (OWLOntologyStorageException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}	    
-	        */
 	        return list;
 			
 		}

@@ -91,8 +91,9 @@ public class EditClass extends XWikiAction {
 			List<String> typeList = new ArrayList<String>();
 	        Set<OWLClassExpression> superClasses = existing.getSuperClasses(ontology);
 	        Set<OWLClassExpression> subClasses = existing.getSubClasses(ontology);
+	        Set<OWLClassExpression> equiClasses = existing.getEquivalentClasses(ontology);
 
-	        if(superClasses == null && subClasses == null)
+	        if(superClasses == null && subClasses == null && equiClasses == null)
 	        {
 	        	outer = getAxiom(query);
 	        }
@@ -113,6 +114,18 @@ public class EditClass extends XWikiAction {
 		            try {
 						inner = new JSONObject();
 						inner.put("SelectedRelation", "SuperClass");
+						inner.put("SelectedClass", desc.toString().split("#")[1].split(">")[0]);
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+		            outer.put(inner);
+		        }
+		        
+		        for(OWLClassExpression desc : equiClasses) {
+		        	try {
+						inner = new JSONObject();
+						inner.put("SelectedRelation", "EquivalentClass");
 						inner.put("SelectedClass", desc.toString().split("#")[1].split(">")[0]);
 					} catch (JSONException e) {
 						// TODO Auto-generated catch block
