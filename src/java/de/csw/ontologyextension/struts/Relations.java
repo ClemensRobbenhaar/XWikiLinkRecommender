@@ -1,6 +1,5 @@
 package de.csw.ontologyextension.struts;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -11,7 +10,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -21,16 +19,13 @@ import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLOntologyStorageException;
-
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.web.XWikiAction;
 import com.xpn.xwiki.web.XWikiRequest;
 
-public class EditClass extends XWikiAction {
+public class Relations extends XWikiAction {
 	
 	@Override
 	public boolean action(XWikiContext context) throws XWikiException {
@@ -75,16 +70,6 @@ public class EditClass extends XWikiAction {
 
 	
 		public JSONArray getRelations(OWLClass existing, String query) {
-			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			OWLDataFactory factory = manager.getOWLDataFactory();
-			/*File file = new File("/home/hanna/Git/XWikiLinkRecommenderNew/resources/ontology/gewuerz.owl");
-			OWLOntology ontology = null;
-			try {
-				ontology = manager.loadOntologyFromOntologyDocument(file);
-			} catch (OWLOntologyCreationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}*/
 			OWLOntology ontology = OntologyManager.getOntology();
 			JSONObject inner = null;
             JSONArray outer = new JSONArray();
@@ -241,14 +226,6 @@ public class EditClass extends XWikiAction {
 		public JSONArray getAxiom(String query) {
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			OWLDataFactory factory = manager.getOWLDataFactory();
-			/*File file = new File("/home/hanna/Git/XWikiLinkRecommenderNew/resources/ontology/gewuerz.owl");
-			OWLOntology ontology = null;
-			try {
-				ontology = manager.loadOntologyFromOntologyDocument(file);
-			} catch (OWLOntologyCreationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}*/
 			OWLOntology ontology = OntologyManager.getOntology();
 			JSONObject inner = null;
 			JSONArray outer = new JSONArray();
@@ -256,7 +233,6 @@ public class EditClass extends XWikiAction {
 			IRI newClassIRI = IRI
 	                .create(ontology.getOntologyID().getOntologyIRI() + "#" + query);
 			OWLClass newClass = factory.getOWLClass(newClassIRI);
-			OWLDeclarationAxiom declarationAxiom = factory.getOWLDeclarationAxiom(newClass);
 			/*AddAxiom declAxiom = new AddAxiom(ontology, declarationAxiom);
 			manager.applyChange(declAxiom);
 			try {

@@ -34,7 +34,7 @@ import com.xpn.xwiki.web.XWikiRequest;
 import de.csw.util.Config;
 import de.csw.xwiki.plugin.OntologyPlugin;
 
-public class AddClass extends XWikiAction {
+public class Addition extends XWikiAction {
 	
 	@Override
 	public boolean action(XWikiContext context) throws XWikiException {

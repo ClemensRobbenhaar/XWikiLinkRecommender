@@ -1,38 +1,25 @@
 package de.csw.ontologyextension.struts;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLOntologyStorageException;
-import org.semanticweb.owlapi.model.RemoveAxiom;
-import org.semanticweb.owlapi.model.RemoveOntologyAnnotation;
-
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.web.XWikiAction;
-import com.xpn.xwiki.web.XWikiRequest;
 
-public class GetClasses extends XWikiAction {
+public class Classes extends XWikiAction {
 	
 	@Override
 	public boolean action(XWikiContext context) throws XWikiException {
@@ -55,13 +42,12 @@ public class GetClasses extends XWikiAction {
 	
 		public JSONArray getClasses() {
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			OWLDataFactory factory = manager.getOWLDataFactory();
 			OWLOntology ontology = OntologyManager.getOntology();
 			JSONObject inner = null;
             JSONArray outer = new JSONArray();
+            ArrayList<String> all = new ArrayList<String>();
 			for(OWLAxiom bx : ontology.getLogicalAxioms()) {
 				inner = new JSONObject();
-				System.out.println("AxiomWithout Anno: " + bx.getAxiomWithoutAnnotations());
 				String[] rel = bx.getAxiomWithoutAnnotations().toString().split("\\(");
 				if(bx.getAxiomWithoutAnnotations().toString().indexOf("ObjectIntersectionOf") > -1) 
 				{
@@ -79,6 +65,8 @@ public class GetClasses extends XWikiAction {
 
 				else {
 					String[] axiom = rel[1].split(" ");
+			      	all.add(axiom[0]);
+			      	all.add(axiom[1]);
 				try {
 					inner.put("Relation", rel[0]);
 					inner.put("Class", axiom[0].split("#")[1].replace(">", ""));
@@ -87,11 +75,35 @@ public class GetClasses extends XWikiAction {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+
+		      	
 				outer.put(inner);
-				System.out.println(outer);
 				}
 			}
+			
+	        ArrayList<String> cls = new ArrayList<String>();
+			for(OWLClass cx : ontology.getClassesInSignature()) {
+	    		cls.add(cx.toString());
+	    		
+		    }
+	    	Set<String> set = new HashSet<String>(all);
+	    	cls.removeAll(set);
+
+	    	for(String str : cls)
+	    	{				
+	    		inner = new JSONObject();
+		    	System.out.println(str);
+	    		try {
+		    		inner.put("NoRelation", str.split("#")[1].replace(">", ""));
+			    	System.out.println(inner);
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	    		outer.put(inner);
+	    	}
+	    	System.out.println(cls);
+	    	System.out.println(outer);
 
 		    return outer;
 		}
